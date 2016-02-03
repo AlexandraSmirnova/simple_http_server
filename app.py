@@ -28,7 +28,7 @@ def change_value(key = None):
 	required_data = ["value"]        
 	check_data(content, required_data)		
 	data[key] = content["value"]	
-	return json.dumps({"result" : 200, "time": datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M")})
+	return json.dumps({"result" : data[key], "time": datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M")})
 
 
 #curl -X POST -H "Content-Type: application/json" -d '{"key": "testkey", "value": "somevalue"}' http://localhost:5000/dictionary
@@ -40,15 +40,15 @@ def add_value():
 	if data.get(content["key"]) != None:
 		abort(409)
 	data[content["key"]] = content["value"]
-	return json.dumps({"result" : 200, "time": datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M")})
+	return json.dumps({"result" : data[content["key"]], "time": datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M")})
 
 
 # curl -X DELETE http://0.0.0.0:5000/dictionary/testkey
 @app.route('/dictionary/<key>', methods=['DELETE'])
 def delete_value(key = None):
 	if data.get(key) != None:
-		data.pop(key)
-	return json.dumps({"result" : 200, "time": datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M")})
+		data.pop(key)		
+	return json.dumps({"result" : "null", "time": datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M")})
 
 
 # for checking json data
