@@ -3,6 +3,7 @@ from noseapp import TestCase
 from noseapp.ext.requests import RequestsEx, make_config
 import noseapp
 import json
+import requests
 
 suite = noseapp.Suite(__name__)
 
@@ -51,16 +52,18 @@ class StepByStepCase(noseapp.ScreenPlayCase):
 	def step_two(self):
 		api.post('dictionary', {'key': 'name', 'value': 'My name is Flask Server'})
 
-	@noseapp.step(3, 'put value')
+	# the same key-value, expected 409
+	@noseapp.step(3, 'if key-value the same, 409 will be expected')
 	def step_three(self):
-		api.put('dictionary/name', {'value': 'Flask Server'})
+		with self.assertRaises(requests.exceptions.HTTPError):
+			api.post('dictionary', {'key': 'name', 'value': 'My name is Flask Server'})
 
 	@noseapp.step(4, 'check value')
-	def step_four(self):
+	def step_four(self):		
 		api.get('dictionary/name')
 
 
-
+# tests on delete values
 @suite.register
 class TestCase(noseapp.TestCase):
 
@@ -69,6 +72,25 @@ class TestCase(noseapp.TestCase):
 
 	def test_delete_two(self):        
 		api.delete('dictionary/name') 
+
+#tests on errors
+@suite.register
+class TestCase(noseapp.TestCase):
+
+	# unknown key (1), expected 404
+	def test_exception_one(self):
+		with self.assertRaises(requests.exceptions.HTTPError):
+			api.get('dictionary/key1000')
+
+	# unknown key (2), expected 404
+	def test_exception_two(self):
+		with self.assertRaises(requests.exceptions.HTTPError):
+			api.put('dictionary/key1000', {'value' : 'new_value'})
+
+	# value was missed, expected 400
+	def test_on_exception_three(self):
+		with self.assertRaises(requests.exceptions.HTTPError):
+			api.post('dictionary', {'value': 'My name'})	
 
 
 app = noseapp.NoseApp('example')
